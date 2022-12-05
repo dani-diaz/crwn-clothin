@@ -3,7 +3,8 @@ import {
     getAuth,
     signInWithRedirect,
     signInWithPopup,
-    GoogleAuthProvider
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { 
     getFirestore,
@@ -32,10 +33,16 @@ prompt: "select_account"
 
 export const auth = getAuth();
 export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+export const signInWithGoogleRedirect = () => signInWithRedirect(auth, provider);
 
 export const db = getFirestore();
 
-export const createUserDocumentFormAuth = async (userAuth) => {
+export const createUserDocumentFormAuth = async (
+    userAuth, 
+    additionalInformation = {}
+    ) => {
+    if(!userAuth) return; //this tells if we dont get the info needed then dont run the function!!
+
     const userDocRef = doc(db, 'user', userAuth.uid);
 
     console.log(userDocRef);
@@ -53,6 +60,7 @@ export const createUserDocumentFormAuth = async (userAuth) => {
             displayName,
             email,
             createdAt,
+            ...additionalInformation,
           });
         } catch (error) {
           console.log('error creating the user', error.message);
@@ -60,8 +68,14 @@ export const createUserDocumentFormAuth = async (userAuth) => {
       }
     
       return userDocRef;
+};
 
 
-}
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+    if(!email || !password) return;
+
+    return await createUserWithEmailAndPassword(auth, email, password);
+
+};
 
 
